@@ -3,8 +3,9 @@ package services
 import (
 	interfaces "authentication/interface"
 	"authentication/models"
+	"errors"
 	"fmt"
-	
+
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -30,11 +31,22 @@ func NewUserServ(usercollection *mongo.Collection, ctx context.Context) interfac
 func (u *UserServiceImpl) Signup(user *models.Credentials) error {
 	password := user.Password
 	//fmt.Println(user.Password)
+	var duplicate *models.Credentials
+	er := u.usercollection.FindOne(u.ctx, bson.M{"username": user.Username}).Decode(&duplicate)
+	fmt.Println(er)
+	// if er !=nil{
+	// 	return er
+	// }
+	if duplicate!=nil&&duplicate.Username==user.Username{
+		return errors.New("user_name_already_exist")
+	}
+	if er !=nil{
 	hashedPassword, err1 := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err1 == nil {
 
 		user.Password = string(hashedPassword)
 	}
+}
 
 	_, err := u.usercollection.InsertOne(u.ctx, user)
 	return err

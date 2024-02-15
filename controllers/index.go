@@ -28,6 +28,7 @@ func (uc *UserController) Signup(ctx *gin.Context) {
 	}
 	err := uc.UserService.Signup(&user)
 	if err != nil {
+		
 		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
 		return
 	}
